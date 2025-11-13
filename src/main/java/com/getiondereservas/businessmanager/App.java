@@ -1,4 +1,4 @@
-package com.getiondereservas.businessmanager.surfaces;
+package com.getiondereservas.businessmanager;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -17,12 +17,13 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        scene = new Scene(loadFXML("primary"), 640, 480);
+        scene = new Scene(loadFXML("primary"));
+        stage.setTitle("Business Manager - Javier, Mario y Raúl - 2 DAM");
         stage.setScene(scene);
         stage.show();
     }
 
-    static void setRoot(String fxml) throws IOException {
+    public static void setRoot(String fxml) throws IOException {
         scene.setRoot(loadFXML(fxml));
     }
 
