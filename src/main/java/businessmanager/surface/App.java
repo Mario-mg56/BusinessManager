@@ -1,4 +1,4 @@
-package com.getiondereservas.businessmanager.surfaces;
+package businessmanager.surface;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;

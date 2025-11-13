@@ -1,7 +1,7 @@
-module com.getiondereservas.businessmanager {
+module businessmanager.surface {
     requires javafx.controls;
     requires javafx.fxml;
 
-    opens com.getiondereservas.businessmanager to javafx.fxml;
-    exports com.getiondereservas.businessmanager;
+    opens businessmanager.surface to javafx.fxml;
+    exports businessmanager.surface;
 }

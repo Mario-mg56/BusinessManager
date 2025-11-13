@@ -1,4 +1,4 @@
-package com.getiondereservas.businessmanager.surfaces;
+package businessmanager.surface;
 
 import java.io.IOException;
 import javafx.fxml.FXML;
