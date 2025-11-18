@@ -1,9 +1,12 @@
 package businessmanager.management;
 
+import java.util.ArrayList;
+
 public class Entity {
     int id, cp, phone;
     String name, address, city, province, country, email;
     char type;
+    ArrayList<Bill> bills;
 
     public Entity(int id, String name, char type, String address, String city, String province, String country, String email) {
         this.id = id;
@@ -14,7 +17,13 @@ public class Entity {
         this.province = province;
         this.country = country;
         this.email = email;
+        this.bills = new ArrayList();
     }
+    
+    public ArrayList<Bill> getBills() {return bills;}
+    public void setBills(ArrayList<Bill> bills) {this.bills = bills;}
+    public void addBill(Bill bill) {bills.add(bill);}
+    public void removeBill(Bill bill) {bills.remove(bill);}
 
     public int getId(){return id;}
     public void setNif(int id){this.id=id;}
