@@ -63,4 +63,14 @@ public class Bill {
 
     public LocalDate getIssueDate(){return issueDate;}
     public void setIssueDate(LocalDate issueDate){this.issueDate=issueDate;}
+
+    public char getType(){return type;}
+
+    public void setType(char type){this.type = type;}
+
+    public Entity getThirdParty(){return thirdParty;}
+
+    public void setThirdParty(Entity thirdParty){this.thirdParty = thirdParty;}
+    
+    
 }

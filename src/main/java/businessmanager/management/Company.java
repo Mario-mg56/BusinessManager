@@ -6,7 +6,6 @@ public class Company {
     int nif, cp, phone;
     String name, address, city, province, country, email, taxAddress;
     ArrayList<Product> inventory;
-    ArrayList<Bill> bills;
 
     public Company(int nif, String name, String address, String city, String province, String country, String email, String taxAddress) {
         this.nif = nif;
@@ -55,11 +54,4 @@ public class Company {
 
     public String getTaxAddress(){return taxAddress;}
     public void setTaxAddress(String taxAddress){this.taxAddress=taxAddress;}
-    
-    public ArrayList<Bill> getBills() { return bills; }
-    public void setBills(ArrayList<Bill> bills) { this.bills = bills; }
-    public void addBill(Bill bill) { 
-        if(this.bills == null) this.bills = new ArrayList<>();
-        this.bills.add(bill); 
-    }
 }
