@@ -4,7 +4,7 @@ import java.io.InputStream;
 import java.sql.DriverManager;
 import java.util.Properties;
 
-public class Connection {
+public class ConexionDB {
 
     java.sql.Connection connection;
 
