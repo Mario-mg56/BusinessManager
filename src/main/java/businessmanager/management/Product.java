@@ -4,6 +4,7 @@ public class Product {
     private int id, code, quantity, purchasePrize, sellingPrice, iva;
     private Entity supplier;
     String description;
+
     public Product(int id, int code, int quantity, Entity supplier, int purchasePrize, int sellingPrice, int iva, String description) {
         this.id = id;
         this.code = code;

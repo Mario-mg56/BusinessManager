@@ -54,4 +54,5 @@ public class Company {
 
     public String getTaxAddress(){return taxAddress;}
     public void setTaxAddress(String taxAddress){this.taxAddress=taxAddress;}
+
 }
