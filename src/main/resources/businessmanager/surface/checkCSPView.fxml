@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="533.0" prefWidth="995.0" style="-fx-background-color: #f0f4f8;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="businessmanager.surface.CheckCSPController">
+
+    <children>
+        <!-- Tabla -->
+        <TableView layoutX="26.0" layoutY="70.0" prefHeight="406.0" prefWidth="943.0" style="-fx-background-radius: 15; -fx-border-radius: 15; -fx-border-color: #d0d7de; -fx-border-width: 1; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);">
+            <columns>
+                <TableColumn prefWidth="54.4" text="Código" />
+                <TableColumn prefWidth="98.4" text="Nombre" />
+                <TableColumn prefWidth="88" text="NIF" />
+                <TableColumn prefWidth="89" text="Email" />
+                <TableColumn prefWidth="68.0" text="Teléfono" />
+                <TableColumn prefWidth="146" text="Dirección" />
+                <TableColumn prefWidth="71" text="CP" />
+                <TableColumn prefWidth="112" text="Ciudad" />
+                <TableColumn prefWidth="135" text="Provincia" />
+                <TableColumn prefWidth="85" text="País" />
+            </columns>
+        </TableView>
+
+        <!-- Título -->
+        <Label fx:id="labelCSP" alignment="CENTER" layoutX="416.0" layoutY="20.0" prefHeight="30.0" prefWidth="162.0" style="-fx-text-fill: #2c3e50; -fx-font-size: 24; -fx-font-weight: bold;" text="Coscu" textAlignment="CENTER" />
+
+        <!-- Botones -->
+        <Button fx:id="buttonGoBack" layoutX="378.0" layoutY="485.0" mnemonicParsing="false" onAction="#goBack" prefHeight="32.0" prefWidth="110.0" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-size: 14; -fx-background-radius: 10; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 4, 0, 0, 2);" text="Regresar" />
+
+        <Button fx:id="buttonInspect" layoutX="508.0" layoutY="485.0" mnemonicParsing="false" onAction="#inspectCSP" prefHeight="32.0" prefWidth="110.0" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 14; -fx-background-radius: 10; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 4, 0, 0, 2);" text="Seleccionar" />
+    </children>
+</AnchorPane>

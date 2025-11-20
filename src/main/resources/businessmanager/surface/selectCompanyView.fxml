@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="TOP_CENTER" prefHeight="555.0" prefWidth="1050.0" spacing="25.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="businessmanager.surface.SelectCompanyController"
+      style="-fx-background-color: #f0f4f8;">
+
+    <padding>
+        <Insets bottom="25" left="40" right="40" top="25" />
+    </padding>
+
+    <children>
+
+        <!-- Título -->
+        <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Empresas registradas" />
+
+        <AnchorPane prefHeight="450" prefWidth="950">
+
+            <children>
+
+                <!-- Tabla de empresas -->
+                <TableView fx:id="companyTable" layoutX="0" layoutY="0" prefHeight="380" prefWidth="970.0"
+                           style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #d0d7de; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5,0,0,2);">
+                    <columns>
+                        <TableColumn fx:id="colNif" prefWidth="200" text="NIF" />
+                        <TableColumn fx:id="colName" prefWidth="768.0" text="Nombre" />
+                    </columns>
+                </TableView>
+
+                <!-- Botones -->
+                <AnchorPane layoutY="380.0" prefHeight="97.0" prefWidth="970.0">
+                    <children>
+                        <Button fx:id="buttonAddEnterprice" layoutX="157.0" layoutY="33.0" onAction="#addEnterprice" prefHeight="30" prefWidth="160"
+                                style="-fx-background-color:#5cb85c; -fx-text-fill:white; -fx-font-size:14; -fx-background-radius:8; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 3,0,0,2);"
+                                text="Añadir empresa" />
+
+                        <Button fx:id="buttonEditEnterprice" layoutX="402.0" layoutY="33.0" onAction="#editEnterprice" prefHeight="30" prefWidth="164"
+                                style="-fx-background-color:#f0ad4e; -fx-text-fill:white; -fx-font-size:14; -fx-background-radius:8; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 3,0,0,2);"
+                                text="Editar empresa" />
+
+                        <Button fx:id="buttonCheckMore" layoutX="646.0" layoutY="34.0" onAction="#checkMore" prefHeight="30" prefWidth="167"
+                                style="-fx-background-color:#0275d8; -fx-text-fill:white; -fx-font-size:14; -fx-background-radius:8; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 3,0,0,2);"
+                                text="Seleccionar" />
+                    </children>
+                </AnchorPane>
+
+            </children>
+
+        </AnchorPane>
+
+    </children>
+
+</VBox>
