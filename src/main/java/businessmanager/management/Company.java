@@ -54,18 +54,5 @@ public class Company {
 
     public String getTaxAddress(){return taxAddress;}
     public void setTaxAddress(String taxAddress){this.taxAddress=taxAddress;}
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
 
-=======
-    
-    public ArrayList<Bill> getBills() { return bills; }
-    public void setBills(ArrayList<Bill> bills) { this.bills = bills; }
-    public void addBill(Bill bill) { 
-        if(this.bills == null) this.bills = new ArrayList<>();
-        this.bills.add(bill); 
-    }
->>>>>>> 1ae94738fb7735a9ec48ff070ff2a347ec79be56
->>>>>>> 92f371516455825558e5b96a7378f0bc584a255e
 }
