@@ -1,6 +1,7 @@
 package businessmanager.surface;
 
 import businessmanager.database.DataStore;
+import businessmanager.management.BusinessManager;
 import businessmanager.management.Company;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -48,12 +49,8 @@ public class CompanyCSPController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        if (DataStore.selectedCompany != null) {
-            setCompany(DataStore.selectedCompany);
-        }
+        setCompany(BusinessManager.getInstance().getCurrentCompany());
     }
 
-    private void setCompany(Company company) {
-        labelCompanyName.setText(company.getName());
-    }
+    private void setCompany(Company company) {labelCompanyName.setText(company.getName());}
 }

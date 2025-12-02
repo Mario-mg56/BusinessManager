@@ -1,11 +1,12 @@
 package businessmanager.management;
 
+import businessmanager.database.ConnectionDAO;
+
 import java.util.ArrayList;
 
 public class Company {
     int nif, cp, phone;
     String name, address, city, province, country, email, taxAddress;
-    ArrayList<Product> inventory;
 
     public Company(int nif, String name, String address, String city, String province, String country, String email, String taxAddress) {
         this.nif = nif;
@@ -18,14 +19,17 @@ public class Company {
         this.taxAddress = taxAddress;
     }
 
-    public ArrayList<Product> getInventory() {return inventory;}
-    public void setInventory(ArrayList<Product> inventory) {this.inventory = inventory;}
-    public void addProduct(Product product) {inventory.add(product);}
-    public void removeProduct(Product product) {inventory.remove(product);}
-
-    public String getNif(){
-        return nif + "" + "TRWAGMYFPDXBNJZSQVHLCKE".charAt(nif%23);
+    public ArrayList<Product> getInventory() {
+        return ConnectionDAO.getProductosPorEmpresa(getNif());
     }
+    public void addProduct(Product product) {
+        ConnectionDAO.insertProduct(product);
+    }
+    public void removeProduct(Product product) {
+        ConnectionDAO.deleteProduct(product.getId());
+    }
+
+    public String getNif(){return "" + "TRWAGMYFPDXBNJZSQVHLCKE".charAt(nif%23) + nif;}
     public void setNif(int nif){this.nif=nif;}
 
     public String getName(){return name;}

@@ -1,15 +1,16 @@
 package businessmanager.management;
 
+import businessmanager.database.ConnectionDAO;
+
 import java.util.ArrayList;
 
 public class Entity {
-    int id, cp, phone;
+    int nif, cp, phone;
     String name, address, city, province, country, email;
     char type;
-    ArrayList<Bill> bills;
 
-    public Entity(int id, String name, char type, String address, String city, String province, String country, String email) {
-        this.id = id;
+    public Entity(int nif, String name, char type, String address, String city, String province, String country, String email) {
+        this.nif = nif;
         this.name = name;
         this.type = type;
         this.address = address;
@@ -17,16 +18,20 @@ public class Entity {
         this.province = province;
         this.country = country;
         this.email = email;
-        this.bills = new ArrayList();
     }
     
-    public ArrayList<Bill> getBills() {return bills;}
-    public void setBills(ArrayList<Bill> bills) {this.bills = bills;}
-    public void addBill(Bill bill) {bills.add(bill);}
-    public void removeBill(Bill bill) {bills.remove(bill);}
+    public ArrayList<Bill> getBills() {
+        return ConnectionDAO.getFacturas(getNif());
+    }
+    public void addBill(Bill bill) {
+        ConnectionDAO.insertFactura(bill, getNif());
+    }
+    public void removeBill(Bill bill) {
+        ConnectionDAO.deleteFactura(bill.getId());
+    }
 
-    public int getId(){return id;}
-    public void setNif(int id){this.id=id;}
+    public String getNif(){return nif + "" + "TRWAGMYFPDXBNJZSQVHLCKE".charAt(nif%23);}
+    public void setNif(int nif){this.nif = nif;}
 
     public String getName(){return name;}
     public void setName(String name){this.name=name;}

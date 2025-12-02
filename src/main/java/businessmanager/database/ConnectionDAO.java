@@ -16,7 +16,7 @@ public class ConnectionDAO  {
     //           1. MAPEO (Helpers Privados)
     // ==========================================
 
-    private Entity mapEntity(ResultSet rs, char tipo) throws SQLException {
+    private static Entity mapEntity(ResultSet rs, char tipo) throws SQLException {
         Entity e = new Entity(
             rs.getInt("id"), rs.getString("nombre"), tipo,
             rs.getString("direccion"), rs.getString("ciudad"),
@@ -28,7 +28,7 @@ public class ConnectionDAO  {
         return e;
     }
 
-    private Product mapProduct(ResultSet rs) throws SQLException {
+    private static Product mapProduct(ResultSet rs) throws SQLException {
         // Buscamos el proveedor dentro del producto
         Entity proveedor = getEntidadById(rs.getInt("proveedor_id"));
         
@@ -42,7 +42,7 @@ public class ConnectionDAO  {
         );
     }
 
-    private Bill mapBill(ResultSet rs, java.sql.Connection conn) throws SQLException {
+    private static Bill mapBill(ResultSet rs, java.sql.Connection conn) throws SQLException {
         int id = rs.getInt("id");
         Entity tercero = getEntidadById(rs.getInt("tercero_id"));
         ArrayList<Product> productos = getLineasFactura(id, conn); // Busca los productos de esta factura
@@ -69,7 +69,7 @@ public class ConnectionDAO  {
     //                2. EMPRESAS
     // ==========================================
 
-    public  ArrayList<Company> getEmpresas() {
+    public static ArrayList<Company> getEmpresas() {
         ArrayList<Company> lista = new ArrayList<>();
         String sql = "SELECT * FROM Empresa";
 
@@ -88,9 +88,6 @@ public class ConnectionDAO  {
                 );
                 try { c.setCp(Integer.parseInt(rs.getString("cp"))); } catch (Exception e) {}
                 try { c.setPhone(Integer.parseInt(rs.getString("telefono"))); } catch (Exception e) {}
-
-                // Cargamos su inventario automáticamente
-                c.setInventory(getProductosPorEmpresa(rs.getString("nif")));
                 
                 // c.setBills(getFacturas(c)); // Descomentar si tienes el setter
                 lista.add(c);
@@ -99,7 +96,7 @@ public class ConnectionDAO  {
         return lista;
     }
 
-    public boolean insertEmpresa(Company c) {
+    public static boolean insertEmpresa(Company c) {
         String sql = "INSERT INTO Empresa (nif, nombre, direccion, cp, ciudad, provincia, pais, telefono, email, domicilio_fiscal) VALUES (?,?,?,?,?,?,?,?,?,?)";
         try (Connection conn = ConexionDB.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -117,7 +114,7 @@ public class ConnectionDAO  {
         } catch (SQLException e) { e.printStackTrace(); return false; }
     }
 
-    public boolean updateEmpresa(Company c) {
+    public static boolean updateEmpresa(Company c) {
         String sql = "UPDATE Empresa SET nombre=?, direccion=?, cp=?, ciudad=?, provincia=?, pais=?, telefono=?, email=?, domicilio_fiscal=? WHERE nif=?";
         try (Connection conn = ConexionDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, c.getName());
@@ -134,7 +131,7 @@ public class ConnectionDAO  {
         } catch (SQLException e) { e.printStackTrace(); return false; }
     }
 
-    public boolean deleteEmpresa(String nif) {
+    public static boolean deleteEmpresa(String nif) {
         try (Connection conn = ConexionDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement("DELETE FROM Empresa WHERE nif=?")) {
             pstmt.setString(1, nif);
             return pstmt.executeUpdate() > 0;
@@ -145,20 +142,20 @@ public class ConnectionDAO  {
     //                3. ENTIDADES
     // ==========================================
 
-    public ArrayList<Entity> getEntidades() {
+    public static ArrayList<Entity> getEntidades() {
         return executeQueryAndMap("SELECT * FROM Entidad", 'E');
     }
 
-    public ArrayList<Entity> getClientes() {
+    public static ArrayList<Entity> getClientes() {
         return executeQueryAndMap("SELECT e.* FROM Entidad e INNER JOIN Cliente c ON e.id = c.entidad_id", 'C');
     }
 
-    public ArrayList<Entity> getProveedores() {
+    public static ArrayList<Entity> getProveedores() {
         return executeQueryAndMap("SELECT e.* FROM Entidad e INNER JOIN Proveedor p ON e.id = p.entidad_id", 'P');
     }
 
     // Método privado para simplificar las 3 consultas de arriba
-    private ArrayList<Entity> executeQueryAndMap(String sql, char tipo) {
+    private static ArrayList<Entity> executeQueryAndMap(String sql, char tipo) {
         ArrayList<Entity> lista = new ArrayList<>();
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -168,7 +165,7 @@ public class ConnectionDAO  {
         return lista;
     }
 
-    public Entity getEntidadById(int id) {
+    public static Entity getEntidadById(int id) {
         try (Connection conn = ConexionDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Entidad WHERE id=?")) {
             pstmt.setInt(1, id);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -178,7 +175,7 @@ public class ConnectionDAO  {
         return null;
     }
 
-    public boolean insertEntity(Entity e) {
+    public static boolean insertEntity(Entity e) {
         String sql = "INSERT INTO Entidad (codigo, nombre, email, telefono, direccion, cp, ciudad, provincia, pais) VALUES (?,?,?,?,?,?,?,?,?)";
         try (Connection conn = ConexionDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, 0); // Código dummy
@@ -194,7 +191,7 @@ public class ConnectionDAO  {
         } catch (SQLException ex) { ex.printStackTrace(); return false; }
     }
 
-    public boolean updateEntity(Entity e) {
+    public static boolean updateEntity(Entity e) {
         String sql = "UPDATE Entidad SET nombre=?, email=?, telefono=?, direccion=?, cp=?, ciudad=?, provincia=?, pais=? WHERE id=?";
         try (Connection conn = ConexionDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, e.getName());
@@ -205,12 +202,12 @@ public class ConnectionDAO  {
             pstmt.setString(6, e.getCity());
             pstmt.setString(7, e.getProvince());
             pstmt.setString(8, e.getCountry());
-            pstmt.setInt(9, e.getId());
+            pstmt.setString(9, e.getNif());
             return pstmt.executeUpdate() > 0;
         } catch (SQLException ex) { ex.printStackTrace(); return false; }
     }
 
-    public boolean deleteEntity(int id) {
+    public static boolean deleteEntity(int id) {
         try (Connection conn = ConexionDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement("DELETE FROM Entidad WHERE id=?")) {
             pstmt.setInt(1, id);
             return pstmt.executeUpdate() > 0;
@@ -221,21 +218,21 @@ public class ConnectionDAO  {
     //                4. PRODUCTOS
     // ==========================================
 
-    public ArrayList<Product> getProductos() {
+    public static ArrayList<Product> getProductos() {
         return getProductosGeneric("SELECT * FROM Producto", null);
     }
 
-    public ArrayList<Product> getProductosPorEmpresa(String nif) {
+    public static ArrayList<Product> getProductosPorEmpresa(String nif) {
         return getProductosGeneric("SELECT * FROM Producto WHERE empresa_nif = ?", nif);
     }
     
-    public Product getProductoPorCodigo(String codigo) {
+    public static Product getProductoPorCodigo(String codigo) {
         ArrayList<Product> list = getProductosGeneric("SELECT * FROM Producto WHERE codigo = ?", codigo);
         return list.isEmpty() ? null : list.get(0);
     }
 
     // Helper para simplificar consultas de productos
-    private ArrayList<Product> getProductosGeneric(String sql, String param) {
+    private static ArrayList<Product> getProductosGeneric(String sql, String param) {
         ArrayList<Product> lista = new ArrayList<>();
         try (Connection conn = ConexionDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             if (param != null) pstmt.setString(1, param);
@@ -246,12 +243,12 @@ public class ConnectionDAO  {
         return lista;
     }
 
-    public boolean insertProduct(Product p) {
+    public static boolean insertProduct(Product p) {
         String sql = "INSERT INTO Producto (codigo, descripcion, proveedor_id, precio_coste, precio_venta, stock) VALUES (?,?,?,?,?,?)";
         try (Connection conn = ConexionDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, String.valueOf(p.getCode()));
             pstmt.setString(2, p.getDescription());
-            if(p.getSupplier() != null) pstmt.setInt(3, p.getSupplier().getId()); else pstmt.setNull(3, Types.BIGINT);
+            if(p.getSupplier() != null) pstmt.setString(3, p.getSupplier().getNif()); else pstmt.setNull(3, Types.BIGINT);
             pstmt.setDouble(4, p.getPurchasePrize());
             pstmt.setDouble(5, p.getSellingPrice());
             pstmt.setInt(6, p.getQuantity());
@@ -259,12 +256,12 @@ public class ConnectionDAO  {
         } catch (SQLException e) { e.printStackTrace(); return false; }
     }
 
-    public boolean updateProduct(Product p) {
+    public static boolean updateProduct(Product p) {
         String sql = "UPDATE Producto SET codigo=?, descripcion=?, proveedor_id=?, precio_coste=?, precio_venta=?, stock=? WHERE id=?";
         try (Connection conn = ConexionDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, String.valueOf(p.getCode()));
             pstmt.setString(2, p.getDescription());
-            if(p.getSupplier() != null) pstmt.setInt(3, p.getSupplier().getId()); else pstmt.setNull(3, Types.BIGINT);
+            if(p.getSupplier() != null) pstmt.setString(3, p.getSupplier().getNif()); else pstmt.setNull(3, Types.BIGINT);
             pstmt.setDouble(4, p.getPurchasePrize());
             pstmt.setDouble(5, p.getSellingPrice());
             pstmt.setInt(6, p.getQuantity());
@@ -273,7 +270,7 @@ public class ConnectionDAO  {
         } catch (SQLException e) { e.printStackTrace(); return false; }
     }
 
-    public boolean deleteProduct(int id) {
+    public static boolean deleteProduct(int id) {
         try (Connection conn = ConexionDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement("DELETE FROM Producto WHERE id=?")) {
             pstmt.setInt(1, id);
             return pstmt.executeUpdate() > 0;
@@ -284,20 +281,20 @@ public class ConnectionDAO  {
     //                5. FACTURAS
     // ==========================================
 
-    public ArrayList<Bill> getFacturas(Company c) {
-        return getFacturasGeneric("SELECT * FROM Factura WHERE empresa_nif = ?", c.getNif(), null, null);
+    public static ArrayList<Bill> getFacturas(String nif) {
+        return getFacturasGeneric("SELECT * FROM Factura WHERE empresa_nif = ?", nif, null, null);
     }
 
-    public ArrayList<Bill> getFacturasPorEstado(String nif, String estado) {
+    public static ArrayList<Bill> getFacturasPorEstado(String nif, String estado) {
         return getFacturasGeneric("SELECT * FROM Factura WHERE empresa_nif = ? AND estado = ?", nif, estado, null);
     }
 
-    public ArrayList<Bill> getFacturasPorFecha(String nif, LocalDate ini, LocalDate fin) {
+    public static ArrayList<Bill> getFacturasPorFecha(String nif, LocalDate ini, LocalDate fin) {
         return getFacturasGeneric("SELECT * FROM Factura WHERE empresa_nif = ? AND fecha_emision BETWEEN ? AND ?", nif, ini, fin);
     }
 
     // Helper genérico para facturas
-    private ArrayList<Bill> getFacturasGeneric(String sql, String param1, Object param2, Object param3) {
+    private static ArrayList<Bill> getFacturasGeneric(String sql, String param1, Object param2, Object param3) {
         ArrayList<Bill> facturas = new ArrayList<>();
         try (Connection conn = ConexionDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, param1);
@@ -314,7 +311,7 @@ public class ConnectionDAO  {
         return facturas;
     }
 
-    public boolean insertFactura(Bill b, String nifEmpresa) {
+    public static boolean insertFactura(Bill b, String nifEmpresa) {
         String sqlHead = "INSERT INTO Factura (empresa_nif, tipo, numero, fecha_emision, tercero_id, concepto, base_imponible, iva_total, total_factura, estado, observaciones) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
         String sqlLine = "INSERT INTO Factura_Linea (factura_id, producto_id, descripcion, cantidad, precio_unitario, porcentaje_iva, importe_base) VALUES (?,?,?,?,?,?,?)";
         
@@ -329,7 +326,7 @@ public class ConnectionDAO  {
                 pst.setString(2, String.valueOf(b.getType()));
                 pst.setString(3, String.valueOf(b.getNumber()));
                 pst.setDate(4, Date.valueOf(b.getIssueDate()));
-                if(b.getThirdParty() != null) pst.setInt(5, b.getThirdParty().getId()); else pst.setNull(5, Types.BIGINT);
+                if(b.getThirdParty() != null) pst.setString(5, b.getThirdParty().getNif()); else pst.setNull(5, Types.BIGINT);
                 pst.setString(6, b.getConcept());
                 pst.setDouble(7, b.getBaseImponible());
                 pst.setDouble(8, b.getIva());
@@ -368,7 +365,7 @@ public class ConnectionDAO  {
         }
     }
 
-    public boolean updateFacturaHeader(Bill b) {
+    public static boolean updateFacturaHeader(Bill b) {
         String sql = "UPDATE Factura SET numero=?, fecha_emision=?, concepto=?, base_imponible=?, iva_total=?, estado=?, observaciones=? WHERE id=?";
         try (Connection conn = ConexionDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, String.valueOf(b.getNumber()));
@@ -383,7 +380,7 @@ public class ConnectionDAO  {
         } catch (SQLException e) { e.printStackTrace(); return false; }
     }
 
-    public boolean deleteFactura(int id) {
+    public static boolean deleteFactura(int id) {
         // Borramos líneas primero, luego cabecera
         java.sql.Connection conn = null;
         try {
@@ -408,7 +405,7 @@ public class ConnectionDAO  {
     }
 
     // Método privado para obtener los productos de una factura (Usado por mapBill)
-    private ArrayList<Product> getLineasFactura(int facturaId, java.sql.Connection conn) throws SQLException {
+    private static ArrayList<Product> getLineasFactura(int facturaId, java.sql.Connection conn) throws SQLException {
         ArrayList<Product> lineas = new ArrayList<>();
         String sql = "SELECT * FROM Factura_Linea WHERE factura_id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {

@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import businessmanager.database.DataStore;
+import businessmanager.management.BusinessManager;
 import businessmanager.management.Company;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -27,14 +28,15 @@ public class AddEditCompanyController implements Initializable { //This class wi
     @FXML
     private void buttonReturn() throws IOException {
         System.out.println("Returning to selectCompanyView");
+        BusinessManager.getInstance().editing = false;
         App.setRoot("selectCompanyView");
     }
 
     @FXML
     private void buttonAddCompany() throws IOException {
-
         //Need to check if the can be nullable or not
-        int nif = Integer.parseInt(nifField.getText());
+        String nifStr = nifField.getText();
+        int nif = Integer.parseInt(Character.isLetter(nifStr.charAt(nifStr.length()-1)) ? nifStr.substring(0, nifStr.length()-1) : nifStr);
         String name = nameField.getText();
         String address = addressField.getText();
         String city = cityField.getText();
@@ -43,11 +45,15 @@ public class AddEditCompanyController implements Initializable { //This class wi
         String email = emailField.getText();
         String taxAddress = taxAddressField.getText();
 
-        //Object prepared to be uploaded into DB
-        Company company = new Company(nif, name, address, city, province, country, email, taxAddress);
+        //Upload into DB
+        BusinessManager bm = BusinessManager.getInstance();
+        if (bm.editing)
+            bm.updateCompany(new Company(nif, name, address, city, province, country, email, taxAddress));
+        else
+            bm.addCompany(new Company(nif, name, address, city, province, country, email, taxAddress));
 
+        bm.editing = false;
         System.out.println("Company added");
-
     }
 
     @Override
