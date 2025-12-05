@@ -12,7 +12,7 @@ import Bills.GeneradorFactura;
 public class prueba {
     public static void main(String[] args) {
         GeneradorFactura c1= new GeneradorFactura();
-        c1.generarFactura(3);
+        c1.generarFactura(1);
     }
     
 }

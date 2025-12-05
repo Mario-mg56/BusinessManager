@@ -207,9 +207,9 @@ public class ConnectionDAO  {
         } catch (SQLException ex) { ex.printStackTrace(); return false; }
     }
 
-    public static boolean deleteEntity(int id) {
+    public static boolean deleteEntity(String id) {
         try (Connection conn = ConexionDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement("DELETE FROM Entidad WHERE id=?")) {
-            pstmt.setInt(1, id);
+            pstmt.setString(1, id);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) { e.printStackTrace(); return false; }
     }
