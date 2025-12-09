@@ -78,21 +78,37 @@ public class ConnectionDAO  {
              ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
-                int nifNum = 0;
-                try { nifNum = Integer.parseInt(rs.getString("nif").replaceAll("[^0-9]", "")); } catch (Exception e) {}
+                // CORRECCIÓN: Leemos el NIF directamente como String, sin quitar letras
+                String nifReal = rs.getString("nif");
 
+                // Asegúrate de que tu constructor de Company acepte String en el primer parámetro
                 Company c = new Company(
-                    nifNum, rs.getString("nombre"), rs.getString("direccion"),
-                    rs.getString("ciudad"), rs.getString("provincia"), rs.getString("pais"),
-                    rs.getString("email"), rs.getString("domicilio_fiscal")
+                        nifReal, // <--- Aquí pasamos el NIF completo con letra
+                        rs.getString("nombre"),
+                        rs.getString("direccion"),
+                        rs.getString("ciudad"),
+                        rs.getString("provincia"),
+                        rs.getString("pais"),
+                        rs.getString("email"),
+                        rs.getString("domicilio_fiscal")
                 );
-                try { c.setCp(Integer.parseInt(rs.getString("cp"))); } catch (Exception e) {}
-                try { c.setPhone(Integer.parseInt(rs.getString("telefono"))); } catch (Exception e) {}
-                
-                // c.setBills(getFacturas(c)); // Descomentar si tienes el setter
+
+                // Parseo seguro de enteros para CP y Teléfono
+                try {
+                    String cpStr = rs.getString("cp");
+                    c.setCp(cpStr != null ? Integer.parseInt(cpStr) : 0);
+                } catch (Exception e) { c.setCp(0); }
+
+                try {
+                    String phStr = rs.getString("telefono");
+                    c.setPhone(phStr != null ? Integer.parseInt(phStr) : 0);
+                } catch (Exception e) { c.setPhone(0); }
+
                 lista.add(c);
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return lista;
     }
 
@@ -132,10 +148,67 @@ public class ConnectionDAO  {
     }
 
     public static boolean deleteEmpresa(String nif) {
-        try (Connection conn = ConexionDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement("DELETE FROM Empresa WHERE nif=?")) {
-            pstmt.setString(1, nif);
-            return pstmt.executeUpdate() > 0;
-        } catch (SQLException e) { e.printStackTrace(); return false; }
+        Connection conn = null;
+        try {
+            System.out.println("--- INICIO BORRADO EMPRESA: " + nif + " ---");
+            conn = ConexionDB.getConnection();
+            conn.setAutoCommit(false);
+
+            // 1. LÍNEAS
+            String sqlLineas = "DELETE FROM Factura_Linea WHERE factura_id IN (SELECT id FROM Factura WHERE empresa_nif = ?)";
+            try (PreparedStatement pstLineas = conn.prepareStatement(sqlLineas)) {
+                pstLineas.setString(1, nif);
+                int lineasBorradas = pstLineas.executeUpdate();
+                System.out.println("Paso 1: Líneas borradas = " + lineasBorradas);
+            }
+
+            // 2. FACTURAS
+            String sqlFacturas = "DELETE FROM Factura WHERE empresa_nif = ?";
+            try (PreparedStatement pstFacturas = conn.prepareStatement(sqlFacturas)) {
+                pstFacturas.setString(1, nif);
+                int facturasBorradas = pstFacturas.executeUpdate();
+                System.out.println("Paso 2: Facturas borradas = " + facturasBorradas);
+            }
+
+            // 3. PRODUCTOS
+            // ATENCIÓN: Aquí suele fallar si el producto se usa en facturas 'huérfanas'
+            String sqlProductos = "DELETE FROM Producto WHERE empresa_nif = ?";
+            try (PreparedStatement pstProductos = conn.prepareStatement(sqlProductos)) {
+                pstProductos.setString(1, nif);
+                int productosBorrados = pstProductos.executeUpdate();
+                System.out.println("Paso 3: Productos borrados = " + productosBorrados);
+            }
+
+            // 4. EMPRESA
+            String sqlEmpresa = "DELETE FROM Empresa WHERE nif = ?";
+            try (PreparedStatement pstEmpresa = conn.prepareStatement(sqlEmpresa)) {
+                pstEmpresa.setString(1, nif);
+                int empresaBorrada = pstEmpresa.executeUpdate();
+                System.out.println("Paso 4: Empresa borrada (filas afectadas) = " + empresaBorrada);
+
+                if (empresaBorrada > 0) {
+                    conn.commit();
+                    System.out.println("--- ÉXITO: COMMIT REALIZADO ---");
+                    return true;
+                } else {
+                    conn.rollback();
+                    System.err.println("--- FALLO: No se encontró el NIF " + nif + " en la tabla Empresa ---");
+                    return false;
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("--- ERROR SQL DETECTADO ---");
+            e.printStackTrace(); // MIRA ESTE ERROR EN LA CONSOLA
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
+            return false;
+        } finally {
+            if (conn != null) {
+                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+        }
     }
 
     // ==========================================

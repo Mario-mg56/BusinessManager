@@ -45,17 +45,8 @@ public class AddEditCompanyController implements Initializable {
         }
 
         try {
-            // Parsear NIF
-            String nifStr = nifField.getText().trim().toUpperCase();
-            int nifNum;
 
-            // Extraer solo los números del NIF
-            String nifNumbers = nifStr.replaceAll("[^0-9]", "");
-            if (nifNumbers.isEmpty()) {
-                showAlert("Error", "El NIF debe contener números.");
-                return;
-            }
-            nifNum = Integer.parseInt(nifNumbers);
+            String nifNum = nifField.getText().trim().toUpperCase();
 
             // Obtener otros campos
             String name = nameField.getText().trim();

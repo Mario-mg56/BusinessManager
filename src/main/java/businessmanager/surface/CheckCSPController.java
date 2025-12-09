@@ -29,10 +29,10 @@ import java.util.ResourceBundle;
 public class CheckCSPController implements Initializable {
 
     @FXML
-    public Label labelCSP, lblSubtitle, lblTotal, lblSelected, lblFilter;
+    public Label labelCSP, lblSubtitle, lblTotal, lblSelected;
 
     @FXML
-    public Button buttonGoBack, buttonInspect, buttonAdd, buttonEdit, buttonDelete, buttonExport, buttonRefresh;
+    public Button buttonGoBack, buttonInspect, buttonAdd, buttonEdit, buttonDelete, buttonBill, buttonRefresh;
 
     @FXML
     private TableView<Object> tableView;
@@ -163,21 +163,18 @@ public class CheckCSPController implements Initializable {
                     ArrayList<Entity> clientes = ConnectionDAO.getClientes();
                     allItems.addAll(clientes);
                     items.addAll(clientes);
-                    lblFilter.setText("Filtro: Clientes");
                     break;
 
                 case "Proveedores":
                     ArrayList<Entity> proveedores = ConnectionDAO.getProveedores();
                     allItems.addAll(proveedores);
                     items.addAll(proveedores);
-                    lblFilter.setText("Filtro: Proveedores");
                     break;
 
                 case "Productos":
                     ArrayList<Product> productos = ConnectionDAO.getProductosPorEmpresa(currentCompany.getNif());
                     allItems.addAll(productos);
                     items.addAll(productos);
-                    lblFilter.setText("Filtro: Productos de " + currentCompany.getName());
                     break;
 
                 default:

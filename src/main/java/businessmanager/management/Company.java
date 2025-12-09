@@ -5,10 +5,10 @@ import businessmanager.database.ConnectionDAO;
 import java.util.ArrayList;
 
 public class Company {
-    int nif, cp, phone;
-    String name, address, city, province, country, email, taxAddress;
+    int  cp, phone;
+    String nif,name, address, city, province, country, email, taxAddress;
 
-    public Company(int nif, String name, String address, String city, String province, String country, String email, String taxAddress) {
+    public Company(String nif, String name, String address, String city, String province, String country, String email, String taxAddress) {
         this.nif = nif;
         this.name = name;
         this.address = address;
@@ -29,8 +29,8 @@ public class Company {
         ConnectionDAO.deleteProduct(product.getId());
     }
 
-    public String getNif(){return "" + "TRWAGMYFPDXBNJZSQVHLCKE".charAt(nif%23) + nif;}
-    public void setNif(int nif){this.nif=nif;}
+    public String getNif(){return nif;}
+    public void setNif(String nif){this.nif=nif;}
 
     public String getName(){return name;}
     public void setName(String name){this.name=name;}

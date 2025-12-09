@@ -19,7 +19,7 @@ import java.util.ResourceBundle;
 public class CompanyCSPController implements Initializable {
 
     @FXML
-    private Label labelCompanyName, lblResumen;
+    private Label labelCompanyName;
 
     @FXML
     public void goToClients(ActionEvent actionEvent) throws IOException {
@@ -69,7 +69,6 @@ public class CompanyCSPController implements Initializable {
             loadSummary();
         } else {
             labelCompanyName.setText("No hay empresa seleccionada");
-            lblResumen.setText("📊 Resumen: Sin datos");
             System.err.println("Error: No hay empresa actual seleccionada");
         }
     }
@@ -92,11 +91,8 @@ public class CompanyCSPController implements Initializable {
             int totalProveedores = proveedores != null ? proveedores.size() : 0;
             int totalProductos = productos != null ? productos.size() : 0;
 
-            lblResumen.setText(String.format("📊 Resumen: %d Clientes | %d Proveedores | %d Productos",
-                    totalClientes, totalProveedores, totalProductos));
-
         } catch (Exception e) {
-            lblResumen.setText("📊 Resumen: Error cargando datos");
+
             e.printStackTrace();
         }
     }
