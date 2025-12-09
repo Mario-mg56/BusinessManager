@@ -29,7 +29,7 @@ public class AddEditCompanyController implements Initializable {
     private Label labelAddEditCompany;
 
     @FXML
-    private Button butonAddEditCompany;
+    private Button buttonAddEditCompany;
 
     @FXML
     private void buttonReturn() throws IOException {
@@ -180,7 +180,7 @@ public class AddEditCompanyController implements Initializable {
         if (DataStore.selectedCompany != null && BusinessManager.getInstance().editing) {
             // Modo edición
             labelAddEditCompany.setText(editCompanyText);
-            butonAddEditCompany.setText(editCompanyText);
+            buttonAddEditCompany.setText(editCompanyText);
 
             // Rellenar campos con datos de la empresa
             nifField.setText(DataStore.selectedCompany.getNif());
@@ -203,7 +203,7 @@ public class AddEditCompanyController implements Initializable {
         } else {
             // Modo creación
             labelAddEditCompany.setText(addCompanyText);
-            butonAddEditCompany.setText(addCompanyText);
+            buttonAddEditCompany.setText(addCompanyText);
 
             // Limpiar campos
             cleanFields();
@@ -216,7 +216,6 @@ public class AddEditCompanyController implements Initializable {
     }
 
     private void cleanFields() {
-        nifField.clear();
         nameField.clear();
         addressField.clear();
         cityField.clear();

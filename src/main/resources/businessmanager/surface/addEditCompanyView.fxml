@@ -88,7 +88,7 @@
             </tooltip>
         </Button>
 
-        <Button fx:id="buttonAddEditCompany" onAction="#buttonAddCompany" style="-fx-background-color: #28a745; -fx-text-fill: white;                       -fx-font-size: 16px; -fx-font-weight: bold;                       -fx-background-radius: 8; -fx-cursor: hand;                       -fx-padding: 12 40; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 6, 0, 0, 3);" text="Guardar Empresa">
+        <Button fx:id="buttonAddEditCompany" onAction="#buttonAddEditCompany" style="-fx-background-color: #28a745; -fx-text-fill: white;                       -fx-font-size: 16px; -fx-font-weight: bold;                       -fx-background-radius: 8; -fx-cursor: hand;                       -fx-padding: 12 40; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 6, 0, 0, 3);" text="Guardar Empresa">
             <tooltip>
                 <Tooltip text="Guardar los datos de la empresa" />
             </tooltip>
