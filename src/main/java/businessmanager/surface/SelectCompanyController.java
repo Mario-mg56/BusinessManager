@@ -14,7 +14,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -31,9 +30,6 @@ public class SelectCompanyController {
     public Button buttonCheckMore;
 
     @FXML
-    private Button buttonAddEnterprice;
-    
-    @FXML
     private TableView<Company> companyTable;
 
     @FXML
@@ -47,9 +43,6 @@ public class SelectCompanyController {
 
     @FXML
     private TextField searchField;
-
-    @FXML
-    private Label lblTotalEmpresas;
 
     @FXML
     private ObservableList<Company> companyList;
@@ -79,15 +72,14 @@ public class SelectCompanyController {
             ArrayList<Company> companies = ConnectionDAO.getEmpresas();
             companyList.clear();
             companyList.addAll(companies);
-            lblTotalEmpresas.setText("Business Manager v1.0 | Total empresas: " + companies.size());
         } catch (Exception e) {
-            showAlert("Error", "No se pudieron cargar las empresas: " + e.getMessage());
+
             e.printStackTrace();
         }
     }
 
     @FXML
-    private void addEnterprice() throws IOException {
+    private void addCompanies() throws IOException {
         DataStore.selectedCompany = null;
         BusinessManager.getInstance().editing = false;
         System.out.println("Going to addEditCompanyView");
@@ -95,7 +87,8 @@ public class SelectCompanyController {
     }
 
     @FXML
-    private void editEnterprice() throws IOException {
+    private void editCompanies() throws IOException {
+
         Company selected = companyTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
             showAlert("Selección requerida", "Por favor, selecciona una empresa de la tabla para editar.");
@@ -108,9 +101,11 @@ public class SelectCompanyController {
         App.setRoot("addEditCompanyView");
     }
 
+    //Eliminamos al empresa
     @FXML
     private void deleteCompany() {
         Company selected = companyTable.getSelectionModel().getSelectedItem();
+
         if (selected == null) {
             showAlert("Selección requerida", "Por favor, selecciona una empresa de la tabla para eliminar.");
             return;
@@ -139,19 +134,22 @@ public class SelectCompanyController {
         });
     }
 
+    //Cambiamos la vista de la empresa
     @FXML
     private void checkMore() throws IOException {
         Company selectedCompany = companyTable.getSelectionModel().getSelectedItem();
+
         if (selectedCompany == null) {
             showAlert("Selección requerida", "Por favor, selecciona una empresa de la tabla.");
             return;
         }
 
         BusinessManager.getInstance().setCurrentCompany(selectedCompany);
-        System.out.println("Going to companyCSPView for: " + selectedCompany.getName());
+        System.out.println("Going to companyCSPView");
         App.setRoot("companyCSPView");
     }
 
+    //En la barra buscadora, al poner Nombre, NIF o Ciudad, podemos buscar la empresa
     @FXML
     private void searchCompanies() {
         String searchText = searchField.getText().toLowerCase().trim();
@@ -165,6 +163,7 @@ public class SelectCompanyController {
             ArrayList<Company> filtered = new ArrayList<>();
 
             for (Company company : allCompanies) {
+
                 if (company.getName().toLowerCase().contains(searchText) ||
                         company.getNif().toLowerCase().contains(searchText) ||
                         company.getCity().toLowerCase().contains(searchText)) {
@@ -174,17 +173,9 @@ public class SelectCompanyController {
 
             companyList.clear();
             companyList.addAll(filtered);
-            lblTotalEmpresas.setText("Business Manager v1.0 | Empresas encontradas: " + filtered.size());
         } catch (Exception e) {
             showAlert("Error", "Error en la búsqueda: " + e.getMessage());
         }
-    }
-
-    @FXML
-    private void refreshList() {
-        loadCompanies();
-        searchField.clear();
-        showAlert("Actualizado", "Lista de empresas actualizada.");
     }
 
     private void showAlert(String title, String content) {

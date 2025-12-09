@@ -1,17 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.Tooltip?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<VBox alignment="TOP_CENTER" prefHeight="628.0" prefWidth="870.0" spacing="20.0" style="-fx-background-color: linear-gradient(to bottom, #f8f9fa, #e9ecef);" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="businessmanager.surface.AddEditCompanyController">
+<VBox alignment="TOP_CENTER" prefHeight="628.0" prefWidth="870.0" spacing="20.0" style="-fx-background-color: linear-gradient(to bottom, #f8f9fa, #e9ecef);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="businessmanager.surface.AddEditCompanyController">
 
     <padding>
         <Insets bottom="30" left="40" right="40" top="30" />
@@ -95,7 +88,7 @@
             </tooltip>
         </Button>
 
-        <Button fx:id="butonAddEditCompany" onAction="#buttonAddCompany" style="-fx-background-color: #28a745; -fx-text-fill: white;                       -fx-font-size: 16px; -fx-font-weight: bold;                       -fx-background-radius: 8; -fx-cursor: hand;                       -fx-padding: 12 40; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 6, 0, 0, 3);" text="Guardar Empresa">
+        <Button fx:id="buttonAddEditCompany" onAction="#buttonAddCompany" style="-fx-background-color: #28a745; -fx-text-fill: white;                       -fx-font-size: 16px; -fx-font-weight: bold;                       -fx-background-radius: 8; -fx-cursor: hand;                       -fx-padding: 12 40; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 6, 0, 0, 3);" text="Guardar Empresa">
             <tooltip>
                 <Tooltip text="Guardar los datos de la empresa" />
             </tooltip>

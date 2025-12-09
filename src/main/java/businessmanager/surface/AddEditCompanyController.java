@@ -18,6 +18,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
 public class AddEditCompanyController implements Initializable {
+    ConnectionDAO dao = new ConnectionDAO();
 
     public Button buttonClean;
     @FXML
@@ -247,8 +248,5 @@ public class AddEditCompanyController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
-    }
-
-    public void buttonAddCompany(ActionEvent actionEvent) {
     }
 }

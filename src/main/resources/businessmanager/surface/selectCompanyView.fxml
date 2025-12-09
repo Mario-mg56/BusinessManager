@@ -1,16 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.Tooltip?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<VBox alignment="TOP_CENTER" prefHeight="600.0" prefWidth="1000.0" spacing="20.0" style="-fx-background-color: linear-gradient(to bottom, #f8f9fa, #e9ecef);" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="businessmanager.surface.SelectCompanyController">
+<VBox alignment="TOP_CENTER" prefHeight="600.0" prefWidth="1000.0" spacing="20.0" style="-fx-background-color: linear-gradient(to bottom, #f8f9fa, #e9ecef);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="businessmanager.surface.SelectCompanyController">
 
     <padding>
         <Insets bottom="30" left="40" right="40" top="30" />
@@ -33,7 +27,7 @@
     <VBox spacing="10">
         <HBox alignment="CENTER_RIGHT" spacing="10">
             <TextField fx:id="searchField" promptText="Buscar empresa..." style="-fx-background-radius: 20; -fx-border-radius: 20;                              -fx-border-color: #ced4da; -fx-padding: 8 15;                              -fx-pref-width: 300;" />
-            <Button style="-fx-background-color: #3498db; -fx-text-fill: white;                      -fx-background-radius: 20; -fx-min-width: 40; -fx-min-height: 40;                      -fx-cursor: hand;" text="🔍" />
+            <Button onAction="#searchCompanies" style="-fx-background-color: #3498db; -fx-text-fill: white;                      -fx-background-radius: 20; -fx-min-width: 40; -fx-min-height: 40;                      -fx-cursor: hand;" text="🔍" />
         </HBox>
 
         <TableView fx:id="companyTable" prefHeight="350" style="-fx-background-color: white; -fx-background-radius: 10;                          -fx-border-radius: 10; -fx-border-color: #dee2e6;                          -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 8, 0, 0, 2);">
@@ -50,13 +44,13 @@
 
     <!-- Panel de botones -->
     <HBox alignment="CENTER" spacing="20" style="-fx-padding: 20 0 0 0;">
-        <Button fx:id="buttonAddEnterprice" onAction="#addEnterprice" style="-fx-background-color: #28a745; -fx-text-fill: white;                       -fx-font-size: 14px; -fx-font-weight: bold;                       -fx-background-radius: 8; -fx-cursor: hand;                       -fx-padding: 10 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 4, 0, 0, 2);" text="Añadir Empresa">
+        <Button onAction="#addCompanies" style="-fx-background-color: #28a745; -fx-text-fill: white;                       -fx-font-size: 14px; -fx-font-weight: bold;                       -fx-background-radius: 8; -fx-cursor: hand;                       -fx-padding: 10 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 4, 0, 0, 2);" text="Añadir Empresa">
             <tooltip>
                 <Tooltip text="Crear una nueva empresa" />
             </tooltip>
         </Button>
 
-        <Button fx:id="buttonEditEnterprice" onAction="#editEnterprice" style="-fx-background-color: #17a2b8; -fx-text-fill: white;                       -fx-font-size: 14px; -fx-font-weight: bold;                       -fx-background-radius: 8; -fx-cursor: hand;                       -fx-padding: 10 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 4, 0, 0, 2);" text="Editar Empresa">
+        <Button fx:id="buttonEditEnterprice" onAction="#editCompanies" style="-fx-background-color: #17a2b8; -fx-text-fill: white;                       -fx-font-size: 14px; -fx-font-weight: bold;                       -fx-background-radius: 8; -fx-cursor: hand;                       -fx-padding: 10 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 4, 0, 0, 2);" text="Editar Empresa">
             <tooltip>
                 <Tooltip text="Editar la empresa seleccionada" />
             </tooltip>
@@ -74,5 +68,4 @@
             </tooltip>
         </Button>
     </HBox>
-
 </VBox>
