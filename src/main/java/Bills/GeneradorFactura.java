@@ -21,65 +21,57 @@ public class GeneradorFactura {
 
     public void generarFactura(int idFactura) {
         
-        new Thread(() -> {
-            Connection con = null;
-            try {
-                // 1. CARGAR EL ARCHIVO FUENTE (.JRXML)
-                // Asegúrate que en NetBeans tienes 'Blank_A4.jrxml' en src/main/resources/reports/
-                InputStream reporteStream = getClass().getResourceAsStream("/reports/Blank_A4.jrxml");
-                
-                if (reporteStream == null) {
-                    mostrarErrorFX("Error de Archivo", "No se encuentra el archivo .jrxml en /reports/");
-                    return;
-                }
+        System.out.println("=== PRUEBA DEFINITIVA (Compilando .jrxml) ===");
+        
+        Connection con = null;
 
-                // 2. CONECTAR
-                con = ConexionDB.getConnection();
-                if (con == null) {
-                    mostrarErrorFX("Error de Conexión", "No se pudo conectar a la base de datos.");
-                    return;
-                }
+        try {
+            // 1. CONEXIÓN
+            con = ConexionDB.getConnection();
+            if (con == null) return;
 
-                // --- EL PASO QUE FALTABA: COMPILAR ---
-                // Convertimos el XML (.jrxml) en un objeto Java (JasperReport)
-                JasperReport reporteCompilado = JasperCompileManager.compileReport(reporteStream); // <--- ESTO ES CRUCIAL
+            // 2. VERIFICAR ARCHIVO
+            // Buscamos el código fuente (.jrxml), no el compilado (.jasper)
+            String rutaArchivo = "/reports/Blank_A4.jrxml";
+            InputStream reporteStream = GeneradorFactura.class.getResourceAsStream(rutaArchivo);
 
-                // 3. PARÁMETROS
-                Map<String, Object> parametros = new HashMap<>();
-                parametros.put("id_factura", idFactura);
-
-                // 4. LLENAR REPORTE (Usamos 'reporteCompilado', NO el stream directo)
-                JasperPrint print = JasperFillManager.fillReport(reporteCompilado, parametros, con);
-
-                // 5. EXPORTAR A PDF TEMPORAL
-                File pdfFile = File.createTempFile("Factura_" + idFactura + "_", ".pdf");
-                JasperExportManager.exportReportToPdfFile(print, pdfFile.getAbsolutePath());
-
-                // 6. ABRIR EL ARCHIVO
-                if (Desktop.isDesktopSupported()) {
-                    Desktop.getDesktop().open(pdfFile);
-                } else {
-                    mostrarErrorFX("Error de Sistema", "No se puede abrir el PDF automáticamente.");
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                mostrarErrorFX("Error al Generar Factura", e.getMessage());
-            } finally {
-                if (con != null) {
-                    try { con.close(); } catch (SQLException e) {}
-                }
+            if (reporteStream == null) {
+                System.err.println("❌ ERROR CRÍTICO: No se encuentra el archivo '" + rutaArchivo + "'");
+                System.err.println("   PASOS PARA ARREGLARLO:");
+                System.err.println("   1. Copia 'Blank_A4.jrxml' desde Jaspersoft Studio.");
+                System.err.println("   2. Pégalo en NetBeans en: src/main/resources/reports/");
+                System.err.println("   3. Haz clic derecho en el proyecto -> 'Clean and Build'.");
+                return;
+            } else {
+                System.out.println("✅ Archivo .jrxml encontrado. Procediendo a compilar...");
             }
-        }).start();
-    }
 
-    private void mostrarErrorFX(String titulo, String contenido) {
-        Platform.runLater(() -> {
-            Alert alert = new Alert(AlertType.ERROR);
-            alert.setTitle(titulo);
-            alert.setHeaderText(null);
-            alert.setContentText(contenido);
-            alert.showAndWait();
-        });
+            // 3. COMPILAR (Esto elimina el error de versiones)
+            JasperReport reporteCompilado = JasperCompileManager.compileReport(reporteStream);
+            System.out.println("✅ Compilación exitosa en memoria.");
+
+            // 4. PARÁMETROS
+            Map<String, Object> parametros = new HashMap<>();
+            parametros.put("id_factura", idFactura); 
+
+            // 5. LLENAR Y EXPORTAR
+            System.out.println("Generando PDF...");
+            JasperPrint print = JasperFillManager.fillReport(reporteCompilado, parametros, con);
+
+            File pdfFile = File.createTempFile("Factura_Final_", ".pdf");
+            JasperExportManager.exportReportToPdfFile(print, pdfFile.getAbsolutePath());
+            
+            System.out.println("✅ ¡PDF Creado!: " + pdfFile.getAbsolutePath());
+            
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(pdfFile);
+            }
+
+        } catch (Exception e) {
+            System.err.println("❌ ERROR:");
+            e.printStackTrace();
+        } finally {
+            if (con != null) try { con.close(); } catch (Exception ex) {}
+        }
     }
 }
