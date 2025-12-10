@@ -145,7 +145,7 @@ public class SelectCompanyController {
         }
 
         BusinessManager.getInstance().setCurrentCompany(selectedCompany);
-        System.out.println("Going to companyCSPView");
+        System.out.println("Going to companyCSPView " + selectedCompany.getNif());
         App.setRoot("companyCSPView");
     }
 

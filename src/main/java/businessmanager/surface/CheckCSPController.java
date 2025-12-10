@@ -223,13 +223,13 @@ public class CheckCSPController implements Initializable {
             case "Clientes":
             case "Proveedores":
                 DataStore.selectedEntity = null;
-                // App.setRoot("addEditEntityView"); // Necesitarás crear esta vista
-                showAlert("Funcionalidad", "Vista de añadir " + type.toLowerCase() + " no implementada aún.");
+                App.setRoot("addEditEntityView"); // Necesitarás crear esta vista
+                //showAlert("Funcionalidad", "Vista de añadir " + type.toLowerCase() + " no implementada aún.");
                 break;
             case "Productos":
                 DataStore.selectedProduct = null;
-                // App.setRoot("addEditProductView"); // Necesitarás crear esta vista
-                showAlert("Funcionalidad", "Vista de añadir productos no implementada aún.");
+                App.setRoot("addEditProductView"); // Necesitarás crear esta vista
+                //showAlert("Funcionalidad", "Vista de añadir productos no implementada aún.");
                 break;
             default:
                 showAlert("Operación no disponible", "Añadir no está disponible para: " + type);
@@ -250,13 +250,15 @@ public class CheckCSPController implements Initializable {
             case "Clientes":
             case "Proveedores":
                 DataStore.selectedEntity = (Entity) selected;
-                // App.setRoot("addEditEntityView");
-                showAlert("Funcionalidad", "Vista de editar " + type.toLowerCase() + " no implementada aún.");
+                BusinessManager.getInstance().editing = true;
+                App.setRoot("addEditEntityView");
+                //showAlert("Funcionalidad", "Vista de editar " + type.toLowerCase() + " no implementada aún.");
                 break;
             case "Productos":
                 DataStore.selectedProduct = (Product) selected;
-                // App.setRoot("addEditProductView");
-                showAlert("Funcionalidad", "Vista de editar productos no implementada aún.");
+                BusinessManager.getInstance().editing = true;
+                App.setRoot("addEditProductView");
+                //showAlert("Funcionalidad", "Vista de editar productos no implementada aún.");
                 break;
             default:
                 showAlert("Operación no disponible", "Editar no está disponible para: " + type);

@@ -18,7 +18,7 @@ public class ConnectionDAO  {
 
     private static Entity mapEntity(ResultSet rs, char tipo) throws SQLException {
         Entity e = new Entity(
-            rs.getInt("id"), rs.getString("nombre"), tipo,
+            rs.getString("id"), rs.getString("nombre"), tipo,
             rs.getString("direccion"), rs.getString("ciudad"),
             rs.getString("provincia"), rs.getString("pais"), rs.getString("email")
         );

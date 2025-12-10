@@ -25,6 +25,9 @@ public class Company {
     public void addProduct(Product product) {
         ConnectionDAO.insertProduct(product);
     }
+    public void updateProduct(Product product) {
+        ConnectionDAO.updateProduct(product);
+    }
     public void removeProduct(Product product) {
         ConnectionDAO.deleteProduct(product.getId());
     }
