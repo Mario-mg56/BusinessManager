@@ -20,7 +20,7 @@ public class ConexionDB {
 
             if (input == null) {
                 System.err.println("¡Error Fatal! No se encuentra el archivo database.properties");
-                throw new RuntimeException("No se pudo encontrar config.properties");
+                throw new RuntimeException("No se pudo encontrar database.properties");
             }
 
             props.load(input);
