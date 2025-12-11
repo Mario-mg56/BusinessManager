@@ -1,12 +1,8 @@
 package businessmanager.database;
 
 import businessmanager.management.*;
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -18,9 +14,9 @@ public class ConnectionDAO  {
 
     private static Entity mapEntity(ResultSet rs, char tipo) throws SQLException {
         Entity e = new Entity(
-            rs.getInt("id"), rs.getString("nombre"), tipo,
-            rs.getString("direccion"), rs.getString("ciudad"),
-            rs.getString("provincia"), rs.getString("pais"), rs.getString("email")
+                rs.getInt("id"),rs.getString("nif"), rs.getString("nombre"), tipo,
+                rs.getString("direccion"), rs.getString("ciudad"),
+                rs.getString("provincia"), rs.getString("pais"), rs.getString("email")
         );
         // Convertimos Strings a int de forma segura (si falla pone 0)
         try { e.setCp(Integer.parseInt(rs.getString("cp"))); } catch (Exception ex) { e.setCp(0); }
@@ -31,14 +27,14 @@ public class ConnectionDAO  {
     private static Product mapProduct(ResultSet rs) throws SQLException {
         // Buscamos el proveedor dentro del producto
         Entity proveedor = getEntidadById(rs.getInt("proveedor_id"));
-        
+
         int code = 0;
         try { code = Integer.parseInt(rs.getString("codigo")); } catch (Exception e) {}
 
         return new Product(
-            rs.getInt("id"), code, rs.getInt("stock"), proveedor,
-            (int) rs.getDouble("precio_coste"), (int) rs.getDouble("precio_venta"),
-            0, rs.getString("descripcion")
+                rs.getInt("id"), code, rs.getInt("stock"), proveedor,
+                (int) rs.getDouble("precio_coste"), (int) rs.getDouble("precio_venta"),
+                0, rs.getString("descripcion")
         );
     }
 
@@ -48,18 +44,18 @@ public class ConnectionDAO  {
         ArrayList<Product> productos = getLineasFactura(id, conn); // Busca los productos de esta factura
 
         // Parseo seguro del numero de factura
-        int numFactura = 0;
-        try { numFactura = Integer.parseInt(rs.getString("numero")); } catch (Exception e) {}
+        String numFactura = null;
+        try { numFactura = rs.getString("numero"); } catch (Exception e) {}
 
         // Obtener caracter de tipo
         String tStr = rs.getString("tipo");
         char tipo = (tStr != null && !tStr.isEmpty()) ? tStr.charAt(0) : ' ';
 
         Bill b = new Bill(
-            id, numFactura, productos, tercero,
-            (int) rs.getDouble("base_imponible"), rs.getString("estado"),
-            rs.getString("concepto"), rs.getString("observaciones"),
-            rs.getDate("fecha_emision").toLocalDate(), tipo
+                id, numFactura, productos, tercero,
+                (int) rs.getDouble("base_imponible"), rs.getString("estado"),
+                rs.getString("concepto"), rs.getString("observaciones"),
+                rs.getDate("fecha_emision").toLocalDate(), tipo
         );
         b.setIva((int) rs.getDouble("iva_total"));
         return b;
@@ -115,7 +111,7 @@ public class ConnectionDAO  {
     public static boolean insertEmpresa(Company c) {
         String sql = "INSERT INTO Empresa (nif, nombre, direccion, cp, ciudad, provincia, pais, telefono, email, domicilio_fiscal) VALUES (?,?,?,?,?,?,?,?,?,?)";
         try (Connection conn = ConexionDB.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, c.getNif());
             pstmt.setString(2, c.getName());
             pstmt.setString(3, c.getAddress());
@@ -152,9 +148,10 @@ public class ConnectionDAO  {
         try {
             System.out.println("--- INICIO BORRADO EMPRESA: " + nif + " ---");
             conn = ConexionDB.getConnection();
-            conn.setAutoCommit(false);
+            conn.setAutoCommit(false); // Inicio Transacción
 
-            // 1. LÍNEAS
+            // 1. LÍNEAS DE FACTURA
+            // Borramos las líneas de todas las facturas de esa empresa
             String sqlLineas = "DELETE FROM Factura_Linea WHERE factura_id IN (SELECT id FROM Factura WHERE empresa_nif = ?)";
             try (PreparedStatement pstLineas = conn.prepareStatement(sqlLineas)) {
                 pstLineas.setString(1, nif);
@@ -171,13 +168,28 @@ public class ConnectionDAO  {
             }
 
             // 3. PRODUCTOS
-            // ATENCIÓN: Aquí suele fallar si el producto se usa en facturas 'huérfanas'
             String sqlProductos = "DELETE FROM Producto WHERE empresa_nif = ?";
             try (PreparedStatement pstProductos = conn.prepareStatement(sqlProductos)) {
                 pstProductos.setString(1, nif);
                 int productosBorrados = pstProductos.executeUpdate();
                 System.out.println("Paso 3: Productos borrados = " + productosBorrados);
             }
+
+
+            String sqlUnlinkCli = "UPDATE Cliente SET empresa_nif = NULL WHERE empresa_nif = ?";
+            try (PreparedStatement pstCli = conn.prepareStatement(sqlUnlinkCli)) {
+                pstCli.setString(1, nif);
+                pstCli.executeUpdate();
+                System.out.println("Paso 3.5a: Clientes desvinculados");
+            }
+
+            String sqlUnlinkProv = "UPDATE Proveedor SET empresa_nif = NULL WHERE empresa_nif = ?";
+            try (PreparedStatement pstProv = conn.prepareStatement(sqlUnlinkProv)) {
+                pstProv.setString(1, nif);
+                pstProv.executeUpdate();
+                System.out.println("Paso 3.5b: Proveedores desvinculados");
+            }
+
 
             // 4. EMPRESA
             String sqlEmpresa = "DELETE FROM Empresa WHERE nif = ?";
@@ -199,7 +211,7 @@ public class ConnectionDAO  {
 
         } catch (SQLException e) {
             System.err.println("--- ERROR SQL DETECTADO ---");
-            e.printStackTrace(); // MIRA ESTE ERROR EN LA CONSOLA
+            e.printStackTrace();
             if (conn != null) {
                 try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
             }
@@ -215,9 +227,6 @@ public class ConnectionDAO  {
     //                3. ENTIDADES
     // ==========================================
 
-    public static ArrayList<Entity> getEntidades() {
-        return executeQueryAndMap("SELECT * FROM Entidad", 'E');
-    }
 
     public static ArrayList<Entity> getClientes() {
         return executeQueryAndMap("SELECT e.* FROM Entidad e INNER JOIN Cliente c ON e.id = c.entidad_id", 'C');
@@ -248,43 +257,229 @@ public class ConnectionDAO  {
         return null;
     }
 
-    public static boolean insertEntity(Entity e) {
-        String sql = "INSERT INTO Entidad (codigo, nombre, email, telefono, direccion, cp, ciudad, provincia, pais) VALUES (?,?,?,?,?,?,?,?,?)";
-        try (Connection conn = ConexionDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, 0); // Código dummy
-            pstmt.setString(2, e.getName());
-            pstmt.setString(3, e.getEmail());
-            pstmt.setString(4, String.valueOf(e.getPhone()));
-            pstmt.setString(5, e.getAddress());
-            pstmt.setString(6, String.valueOf(e.getCp()));
-            pstmt.setString(7, e.getCity());
-            pstmt.setString(8, e.getProvince());
-            pstmt.setString(9, e.getCountry());
-            return pstmt.executeUpdate() > 0;
-        } catch (SQLException ex) { ex.printStackTrace(); return false; }
+    public static int getEntidadIdByNif(String nif) {
+        String sql = "SELECT id FROM Entidad WHERE nif = ?";
+
+        try (Connection conn = ConexionDB.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // Aseguramos que no haya espacios extra
+            pstmt.setString(1, nif.trim());
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("id");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Retornamos -1 si no se encuentra la entidad
+        return -1;
+    }
+
+    public static boolean insertEntity(Entity e, String nifEmpresa) {
+        // 1. SQL para la tabla padre
+        String sqlEntidad = "INSERT INTO Entidad (codigo, nif, nombre, email, telefono, direccion, cp, ciudad, provincia, pais) VALUES (?,?,?,?,?,?,?,?,?,?)";
+
+        // 2. SQL para la tabla hija (Depende del tipo)
+        String sqlChild = (e.getType() == 'C')
+                ? "INSERT INTO Cliente (entidad_id, empresa_nif) VALUES (?, ?)"
+                : "INSERT INTO Proveedor (entidad_id, empresa_nif) VALUES (?, ?)";
+
+        Connection conn = null;
+        try {
+            conn = ConexionDB.getConnection();
+            conn.setAutoCommit(false); // INICIO TRANSACCIÓN
+
+            long idGenerado = -1;
+
+            // PASO 1: Insertar en Entidad y recuperar el ID generado
+            try (PreparedStatement pst = conn.prepareStatement(sqlEntidad, Statement.RETURN_GENERATED_KEYS)) {
+                pst.setInt(1, 0); // Código dummy (o genera uno aleatorio si quieres)
+                pst.setString(2, e.getNif());
+                pst.setString(3, e.getName());
+                pst.setString(4, e.getEmail());
+                pst.setString(5, String.valueOf(e.getPhone()));
+                pst.setString(6, e.getAddress());
+                pst.setString(7, String.valueOf(e.getCp()));
+                pst.setString(8, e.getCity());
+                pst.setString(9, e.getProvince());
+                pst.setString(10, e.getCountry());
+
+                int rows = pst.executeUpdate();
+                if (rows == 0) throw new SQLException("Fallo al crear la entidad, no se insertaron filas.");
+
+                // Recuperar el ID autogenerado (Auto-Increment)
+                try (ResultSet gk = pst.getGeneratedKeys()) {
+                    if (gk.next()) {
+                        idGenerado = gk.getLong(1);
+                        e.setId((int)idGenerado); // Actualizamos el objeto Java
+                    } else {
+                        throw new SQLException("Fallo al crear la entidad, no se obtuvo el ID.");
+                    }
+                }
+            }
+
+            // PASO 2: Insertar en Cliente o Proveedor vinculando a TU empresa
+            try (PreparedStatement pstChild = conn.prepareStatement(sqlChild)) {
+                pstChild.setLong(1, idGenerado); // El ID que acabamos de crear
+                pstChild.setString(2, nifEmpresa); // El NIF de tu empresa (Tech Solutions / MegaStore)
+                pstChild.executeUpdate();
+            }
+
+            conn.commit(); // FIN TRANSACCIÓN (Todo bien)
+            return true;
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            // Si algo falla, deshacemos todo (Rollback)
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException x) { x.printStackTrace(); }
+            }
+            return false;
+        } finally {
+            // Restaurar modo normal y cerrar
+            if (conn != null) {
+                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException x) { x.printStackTrace(); }
+            }
+        }
     }
 
     public static boolean updateEntity(Entity e) {
-        String sql = "UPDATE Entidad SET nombre=?, email=?, telefono=?, direccion=?, cp=?, ciudad=?, provincia=?, pais=? WHERE id=?";
-        try (Connection conn = ConexionDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, e.getName());
-            pstmt.setString(2, e.getEmail());
-            pstmt.setString(3, String.valueOf(e.getPhone()));
-            pstmt.setString(4, e.getAddress());
-            pstmt.setString(5, String.valueOf(e.getCp()));
-            pstmt.setString(6, e.getCity());
-            pstmt.setString(7, e.getProvince());
-            pstmt.setString(8, e.getCountry());
-            pstmt.setString(9, e.getNif());
+        // IMPORTANTE: Separar campos con COMAS (,), nunca usar AND aquí.
+        String sql = "UPDATE Entidad SET nif=?, nombre=?, email=?, telefono=?, direccion=?, cp=?, ciudad=?, provincia=?, pais=? WHERE id=?";
+
+        try (java.sql.Connection conn = ConexionDB.getConnection();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // 1. nif
+            pstmt.setString(1, e.getNif());
+            // 2. nombre
+            pstmt.setString(2, e.getName());
+            // 3. email
+            pstmt.setString(3, e.getEmail());
+            // 4. telefono (Convertimos a String)
+            pstmt.setString(4, String.valueOf(e.getPhone()));
+            // 5. direccion
+            pstmt.setString(5, e.getAddress());
+            // 6. cp (Convertimos a String)
+            pstmt.setString(6, String.valueOf(e.getCp()));
+            // 7. ciudad
+            pstmt.setString(7, e.getCity());
+            // 8. provincia
+            pstmt.setString(8, e.getProvince());
+            // 9. pais
+            pstmt.setString(9, e.getCountry());
+
+            // 10. WHERE id (El ID es el último)
+            pstmt.setInt(10, e.getId());
+
             return pstmt.executeUpdate() > 0;
-        } catch (SQLException ex) { ex.printStackTrace(); return false; }
+
+        } catch (java.sql.SQLException ex) {
+            ex.printStackTrace();
+            return false;
+        }
     }
 
     public static boolean deleteEntity(String id) {
-        try (Connection conn = ConexionDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement("DELETE FROM Entidad WHERE id=?")) {
-            pstmt.setString(1, id);
-            return pstmt.executeUpdate() > 0;
-        } catch (SQLException e) { e.printStackTrace(); return false; }
+        Connection conn = null;
+        try {
+            conn = ConexionDB.getConnection();
+            conn.setAutoCommit(false); // Transacción para seguridad
+
+            // 1. VALIDACIÓN: ¿Tiene facturas asociadas?
+            // No debemos borrar una entidad si tiene historial de facturación
+            String checkFacturas = "SELECT count(*) FROM Factura WHERE tercero_id = ?";
+            try (PreparedStatement pst = conn.prepareStatement(checkFacturas)) {
+                pst.setString(1, id);
+                ResultSet rs = pst.executeQuery();
+                if (rs.next() && rs.getInt(1) > 0) {
+                    throw new RuntimeException("No se puede borrar: La entidad tiene facturas asociadas.");
+                }
+            }
+
+            // 2. VALIDACIÓN: ¿Es un proveedor con productos?
+            String checkProductos = "SELECT count(*) FROM Producto WHERE proveedor_id = ?";
+            try (PreparedStatement pst = conn.prepareStatement(checkProductos)) {
+                pst.setString(1, id);
+                ResultSet rs = pst.executeQuery();
+                if (rs.next() && rs.getInt(1) > 0) {
+                    throw new RuntimeException("No se puede borrar: El proveedor tiene productos en catálogo.");
+                }
+            }
+
+            // 3. BORRAR DE TABLAS HIJAS (Cliente / Proveedor)
+            // Intentamos borrar de ambas por seguridad. Si no existe, no pasa nada.
+            try (PreparedStatement pst = conn.prepareStatement("DELETE FROM Cliente WHERE entidad_id = ?")) {
+                pst.setString(1, id);
+                pst.executeUpdate();
+            }
+            try (PreparedStatement pst = conn.prepareStatement("DELETE FROM Proveedor WHERE entidad_id = ?")) {
+                pst.setString(1, id);
+                pst.executeUpdate();
+            }
+
+            // 4. BORRAR ENTIDAD PADRE
+            try (PreparedStatement pst = conn.prepareStatement("DELETE FROM Entidad WHERE id=?")) {
+                pst.setString(1, id);
+                int affected = pst.executeUpdate();
+
+                if (affected > 0) {
+                    conn.commit();
+                    return true;
+                } else {
+                    conn.rollback();
+                    return false;
+                }
+            }
+        } catch (Exception e) {
+            if (conn != null) try { conn.rollback(); } catch (SQLException ex) {}
+            e.printStackTrace();
+            // Relanzamos la excepción para que el controlador muestre el mensaje de alerta
+            throw new RuntimeException(e.getMessage());
+        } finally {
+            if (conn != null) try { conn.setAutoCommit(true); conn.close(); } catch (SQLException e) {}
+        }
+    }
+
+    // ==========================================
+    //   FILTRAR POR RELACIÓN (TABLAS HIJAS)
+    // ==========================================
+
+    public static ArrayList<Entity> getClientesPorEmpresa(String nifEmpresa) {
+        // Seleccionamos los datos de la Entidad, pero filtramos por la columna del Cliente
+        String sql = "SELECT e.* FROM Entidad e " +
+                "INNER JOIN Cliente c ON e.id = c.entidad_id " +
+                "WHERE c.empresa_nif = ?"; // <--- EL CAMBIO ESTÁ AQUÍ
+
+        return executeQueryAndMap(sql, nifEmpresa, 'C');
+    }
+
+    public static ArrayList<Entity> getProveedoresPorEmpresa(String nifEmpresa) {
+        // Lo mismo para proveedores
+        String sql = "SELECT e.* FROM Entidad e " +
+                "INNER JOIN Proveedor p ON e.id = p.entidad_id " +
+                "WHERE p.empresa_nif = ?"; // <--- EL CAMBIO ESTÁ AQUÍ
+
+        return executeQueryAndMap(sql, nifEmpresa, 'P');
+    }
+
+    // Helper (Asegúrate de tener este método que acepta parámetros)
+    private static ArrayList<Entity> executeQueryAndMap(String sql, String param, char tipo) {
+        ArrayList<Entity> lista = new ArrayList<>();
+        try (java.sql.Connection conn = ConexionDB.getConnection();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            if (param != null) pstmt.setString(1, param);
+
+            try (java.sql.ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) lista.add(mapEntity(rs, tipo));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return lista;
     }
 
     // ==========================================
@@ -298,7 +493,7 @@ public class ConnectionDAO  {
     public static ArrayList<Product> getProductosPorEmpresa(String nif) {
         return getProductosGeneric("SELECT * FROM Producto WHERE empresa_nif = ?", nif);
     }
-    
+
     public static Product getProductoPorCodigo(String codigo) {
         ArrayList<Product> list = getProductosGeneric("SELECT * FROM Producto WHERE codigo = ?", codigo);
         return list.isEmpty() ? null : list.get(0);
@@ -344,10 +539,29 @@ public class ConnectionDAO  {
     }
 
     public static boolean deleteProduct(int id) {
-        try (Connection conn = ConexionDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement("DELETE FROM Producto WHERE id=?")) {
-            pstmt.setInt(1, id);
-            return pstmt.executeUpdate() > 0;
-        } catch (SQLException e) { e.printStackTrace(); return false; }
+        // 1. VALIDACIÓN: ¿El producto aparece en alguna factura?
+        String sqlCheck = "SELECT count(*) FROM Factura_Linea WHERE producto_id = ?";
+
+        try (Connection conn = ConexionDB.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sqlCheck)) {
+
+            pst.setInt(1, id);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next() && rs.getInt(1) > 0) {
+                // Si el producto se ha vendido, NO lo borramos físicamente.
+                throw new RuntimeException("No se puede borrar: El producto aparece en facturas existentes.");
+            }
+
+            // 2. Si no se ha usado nunca, procedemos al borrado
+            try (PreparedStatement pstDel = conn.prepareStatement("DELETE FROM Producto WHERE id=?")) {
+                pstDel.setInt(1, id);
+                return pstDel.executeUpdate() > 0;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     // ==========================================
@@ -387,7 +601,7 @@ public class ConnectionDAO  {
     public static boolean insertFactura(Bill b, String nifEmpresa) {
         String sqlHead = "INSERT INTO Factura (empresa_nif, tipo, numero, fecha_emision, tercero_id, concepto, base_imponible, iva_total, total_factura, estado, observaciones) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
         String sqlLine = "INSERT INTO Factura_Linea (factura_id, producto_id, descripcion, cantidad, precio_unitario, porcentaje_iva, importe_base) VALUES (?,?,?,?,?,?,?)";
-        
+
         java.sql.Connection conn = null;
         try {
             conn = ConexionDB.getConnection();
@@ -406,7 +620,7 @@ public class ConnectionDAO  {
                 pst.setDouble(9, b.getTotal());
                 pst.setString(10, b.getStatus());
                 pst.setString(11, b.getObservations());
-                
+
                 if (pst.executeUpdate() == 0) throw new SQLException("Error insertando factura");
                 try (ResultSet gk = pst.getGeneratedKeys()) {
                     if (gk.next()) { idFactura = gk.getLong(1); b.setId((int)idFactura); }
@@ -487,14 +701,78 @@ public class ConnectionDAO  {
                 while (rs.next()) {
                     // Creamos productos temporales para la factura
                     Product p = new Product(
-                        rs.getInt("producto_id"), 0, (int) rs.getDouble("cantidad"), null,
-                        0, (int) rs.getDouble("precio_unitario"), 
-                        (int) rs.getDouble("porcentaje_iva"), rs.getString("descripcion")
+                            rs.getInt("producto_id"), 0, (int) rs.getDouble("cantidad"), null,
+                            0, (int) rs.getDouble("precio_unitario"),
+                            (int) rs.getDouble("porcentaje_iva"), rs.getString("descripcion")
                     );
                     lineas.add(p);
                 }
             }
         }
         return lineas;
+    }
+
+    public static boolean updateFacturaCompleta(Bill b) {
+        // SQLs necesarios
+        String sqlHeader = "UPDATE Factura SET numero=?, fecha_emision=?, concepto=?, base_imponible=?, iva_total=?, total_factura=?, estado=?, observaciones=? WHERE id=?";
+        String sqlDeleteLines = "DELETE FROM Factura_Linea WHERE factura_id=?";
+        String sqlInsertLine = "INSERT INTO Factura_Linea (factura_id, producto_id, descripcion, cantidad, precio_unitario, porcentaje_iva, importe_base) VALUES (?,?,?,?,?,?,?)";
+
+        Connection conn = null;
+        try {
+            conn = ConexionDB.getConnection();
+            conn.setAutoCommit(false); // INICIO TRANSACCIÓN
+
+            // 1. Actualizar Cabecera
+            try (PreparedStatement pst = conn.prepareStatement(sqlHeader)) {
+                pst.setString(1, b.getNumber()); // Ahora es String
+                pst.setDate(2, Date.valueOf(b.getIssueDate()));
+                pst.setString(3, b.getConcept());
+                pst.setDouble(4, b.getBaseImponible());
+                pst.setDouble(5, b.getIva());
+                pst.setDouble(6, b.getTotal());
+                pst.setString(7, b.getStatus());
+                pst.setString(8, b.getObservations());
+                pst.setInt(9, b.getId());
+                pst.executeUpdate();
+            }
+
+            // 2. Borrar líneas antiguas (Limpieza)
+            try (PreparedStatement pstDel = conn.prepareStatement(sqlDeleteLines)) {
+                pstDel.setInt(1, b.getId());
+                pstDel.executeUpdate();
+            }
+
+            // 3. Insertar líneas nuevas (Las que están en pantalla)
+            try (PreparedStatement pstLine = conn.prepareStatement(sqlInsertLine)) {
+                for (Product p : b.getProducts()) {
+                    pstLine.setInt(1, b.getId());
+                    pstLine.setInt(2, p.getId());
+                    pstLine.setString(3, p.getDescription());
+                    pstLine.setDouble(4, p.getQuantity());
+                    pstLine.setDouble(5, p.getSellingPrice());
+                    // Si tienes getIva() en producto úsalo, sino usa 21.0 por defecto
+                    double ivaPercent = (p.getIva() > 0) ? p.getIva() : 21.0;
+                    pstLine.setDouble(6, ivaPercent);
+                    pstLine.setDouble(7, p.getQuantity() * p.getSellingPrice());
+                    pstLine.addBatch(); // Añadir al lote
+                }
+                pstLine.executeBatch(); // Ejecutar todas a la vez
+            }
+
+            conn.commit(); // FIN TRANSACCIÓN (Guardar cambios)
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
+            return false;
+        } finally {
+            if (conn != null) {
+                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+        }
     }
 }

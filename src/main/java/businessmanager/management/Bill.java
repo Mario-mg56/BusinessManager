@@ -4,13 +4,13 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class Bill {
-    private int id, number, baseImponible, iva;
-    private String status, concept, observations;
+    private int id, baseImponible, iva;
+    private String status, concept, observations, number;
     private LocalDate issueDate;
     private char type;
     private Entity thirdParty;
     private ArrayList<Product> products;
-    public Bill(int id, int number, ArrayList<Product> products, Entity thirdParty,
+    public Bill(int id, String number, ArrayList<Product> products, Entity thirdParty,
                 int baseImponible, String status, String concept, String observations, LocalDate issueDate, char type) {
         this.id = id;
         this.number = number;
@@ -43,8 +43,8 @@ public class Bill {
     public int getId(){return id;}
     public void setId(int id){this.id=id;}
 
-    public int getNumber(){return number;}
-    public void setNumber(int number){this.number=number;}
+    public String getNumber(){return number;}
+    public void setNumber(String number){this.number=number;}
 
     public int getBaseImponible(){return baseImponible;}
     public void setBaseImponible(int baseImponible){this.baseImponible=baseImponible;}

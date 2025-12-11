@@ -5,11 +5,12 @@ import businessmanager.database.ConnectionDAO;
 import java.util.ArrayList;
 
 public class Entity {
-    int nif, cp, phone;
-    String name, address, city, province, country, email;
+    int  id, cp, phone;
+    String nif, name, address, city, province, country, email;
     char type;
 
-    public Entity(int nif, String name, char type, String address, String city, String province, String country, String email) {
+    public Entity(int id, String nif, String name, char type, String address, String city, String province, String country, String email) {
+        this.id = id;
         this.nif = nif;
         this.name = name;
         this.type = type;
@@ -19,7 +20,15 @@ public class Entity {
         this.country = country;
         this.email = email;
     }
-    
+
+    public int getId(){
+        return this.id;
+    }
+
+    public void setId(int id){
+        this.id = id;
+    }
+
     public ArrayList<Bill> getBills() {
         return ConnectionDAO.getFacturas(getNif());
     }
@@ -30,8 +39,8 @@ public class Entity {
         ConnectionDAO.deleteFactura(bill.getId());
     }
 
-    public String getNif(){return nif + "" + "TRWAGMYFPDXBNJZSQVHLCKE".charAt(nif%23);}
-    public void setNif(int nif){this.nif = nif;}
+    public String getNif(){return nif;}
+    public void setNif(String nif){this.nif = nif;}
 
     public String getName(){return name;}
     public void setName(String name){this.name=name;}
@@ -59,4 +68,5 @@ public class Entity {
 
     public String getEmail(){return email;}
     public void setEmail(String email){this.email=email;}
+
 }
