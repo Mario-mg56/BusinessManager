@@ -5,11 +5,12 @@ import businessmanager.database.ConnectionDAO;
 import java.util.ArrayList;
 
 public class Entity {
-    int cp, phone;
+    int  id, cp, phone;
     String nif, name, address, city, province, country, email;
     char type;
 
-    public Entity(String nif, String name, char type, String address, String city, String province, String country, String email) {
+    public Entity(int id, String nif, String name, char type, String address, String city, String province, String country, String email) {
+        this.id = id;
         this.nif = nif;
         this.name = name;
         this.type = type;
@@ -19,7 +20,15 @@ public class Entity {
         this.country = country;
         this.email = email;
     }
-    
+
+    public int getId(){
+        return this.id;
+    }
+
+    public void setId(int id){
+        this.id = id;
+    }
+
     public ArrayList<Bill> getBills() {
         return ConnectionDAO.getFacturas(getNif());
     }
@@ -61,7 +70,7 @@ public class Entity {
     public void setEmail(String email){this.email=email;}
 
     @Override public String toString() {
-        return "Entity{" +
+        return
                 "nif='" + nif + '\'' +
                 ", name='" + name + '\'' +
                 ", type=" + type +
@@ -71,8 +80,6 @@ public class Entity {
                 ", country='" + country + '\'' +
                 ", email='" + email + '\'' +
                 ", cp=" + cp +
-                ", phone=" + phone +
-                '}';
+                ", phone=" + phone;
     }
-
 }

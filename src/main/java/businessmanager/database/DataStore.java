@@ -1,5 +1,6 @@
 package businessmanager.database;
 
+import businessmanager.management.Bill;
 import businessmanager.management.Company;
 import businessmanager.management.Entity;
 import businessmanager.management.Product;
@@ -17,6 +18,7 @@ public class DataStore {
 
     public static String getTypeCSP() { return typeCSP; }
     public static void setTypeCSP(String typeCSP) { DataStore.typeCSP = typeCSP; }
+    public static Bill selectedBill = null;
 
     // Limpiar todos los datos
     public static void clear() {

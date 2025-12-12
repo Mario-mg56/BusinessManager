@@ -27,7 +27,7 @@
             <Region HBox.hgrow="ALWAYS" />
 
             <HBox alignment="CENTER_RIGHT" spacing="10">
-                <TextField fx:id="searchField" promptText="Buscar..." style="-fx-background-radius: 20; -fx-border-radius: 20;                                  -fx-border-color: #ced4da; -fx-padding: 8 15;                                  -fx-pref-width: 250;" />
+                <TextField fx:id="searchField" onAction="#searchItems" promptText="Buscar..." style="-fx-background-radius: 20; -fx-border-radius: 20;                                  -fx-border-color: #ced4da; -fx-padding: 8 15;                                  -fx-pref-width: 250;" />
                 <Button style="-fx-background-color: transparent;                          -fx-text-fill: #6c757d; -fx-cursor: hand;                          -fx-padding: 5;" text="🔍" />
                 <Label fx:id="lblTotal" style="-fx-font-size: 14px; -fx-text-fill: #6c757d;" text="Total: 0" />
             </HBox>
@@ -54,15 +54,9 @@
             </tooltip>
         </Button>
 
-        <Button fx:id="buttonExport" style="-fx-background-color: #6c757d; -fx-text-fill: white;                       -fx-font-size: 14px; -fx-font-weight: bold;                       -fx-background-radius: 8; -fx-cursor: hand;                       -fx-padding: 10 20;" text="Facturas">
+        <Button fx:id="buttonBill" onAction="#goToBills" style="-fx-background-color: #6c757d; -fx-text-fill: white;                       -fx-font-size: 14px; -fx-font-weight: bold;                       -fx-background-radius: 8; -fx-cursor: hand;                       -fx-padding: 10 20;" text="Facturas">
             <tooltip>
                 <Tooltip text="Exportar datos a CSV/Excel" />
-            </tooltip>
-        </Button>
-
-        <Button fx:id="buttonRefresh" style="-fx-background-color: #6f42c1; -fx-text-fill: white;                       -fx-font-size: 14px; -fx-font-weight: bold;                       -fx-background-radius: 8; -fx-cursor: hand;                       -fx-padding: 10 20;" text="🔄 Actualizar">
-            <tooltip>
-                <Tooltip text="Actualizar lista" />
             </tooltip>
         </Button>
 

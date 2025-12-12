@@ -160,13 +160,13 @@ public class CheckCSPController implements Initializable {
         try {
             switch (type) {
                 case "Clientes":
-                    ArrayList<Entity> clientes = ConnectionDAO.getClientes();
+                    ArrayList<Entity> clientes = ConnectionDAO.getClientesPorEmpresa(currentCompany.getNif());
                     allItems.addAll(clientes);
                     items.addAll(clientes);
                     break;
 
                 case "Proveedores":
-                    ArrayList<Entity> proveedores = ConnectionDAO.getProveedores();
+                    ArrayList<Entity> proveedores = ConnectionDAO.getProveedoresPorEmpresa(currentCompany.getNif());
                     allItems.addAll(proveedores);
                     items.addAll(proveedores);
                     break;
@@ -217,51 +217,23 @@ public class CheckCSPController implements Initializable {
 
     @FXML
     public void addCSP(ActionEvent actionEvent) throws IOException {
-        String type = DataStore.getTypeCSP();
+        DataStore.selectedEntity = null; // Limpiamos para que sepa que es nuevo
 
-        switch (type) {
-            case "Clientes":
-            case "Proveedores":
-                DataStore.selectedEntity = null;
-                App.setRoot("addEditEntityView"); // Necesitarás crear esta vista
-                //showAlert("Funcionalidad", "Vista de añadir " + type.toLowerCase() + " no implementada aún.");
-                break;
-            case "Productos":
-                DataStore.selectedProduct = null;
-                App.setRoot("addEditProductView"); // Necesitarás crear esta vista
-                //showAlert("Funcionalidad", "Vista de añadir productos no implementada aún.");
-                break;
-            default:
-                showAlert("Operación no disponible", "Añadir no está disponible para: " + type);
-        }
+        // ACTIVAMOS MODO EDICIÓN (Creación es un tipo de edición)
+
+        App.setRoot("addEditProductView");
     }
 
     @FXML
     public void editCSP(ActionEvent actionEvent) throws IOException {
         Object selected = tableView.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            showAlert("Selección requerida", "Por favor, selecciona un elemento de la tabla para editar.");
-            return;
-        }
+        if (selected != null && selected instanceof Entity) {
+            DataStore.selectedEntity = (Entity) selected;
 
-        String type = DataStore.getTypeCSP();
+            // ACTIVAMOS MODO EDICIÓN
+            BusinessManager.getInstance().editing = true;
 
-        switch (type) {
-            case "Clientes":
-            case "Proveedores":
-                DataStore.selectedEntity = (Entity) selected;
-                BusinessManager.getInstance().editing = true;
-                App.setRoot("addEditEntityView");
-                //showAlert("Funcionalidad", "Vista de editar " + type.toLowerCase() + " no implementada aún.");
-                break;
-            case "Productos":
-                DataStore.selectedProduct = (Product) selected;
-                BusinessManager.getInstance().editing = true;
-                App.setRoot("addEditProductView");
-                //showAlert("Funcionalidad", "Vista de editar productos no implementada aún.");
-                break;
-            default:
-                showAlert("Operación no disponible", "Editar no está disponible para: " + type);
+            App.setRoot("inspectCSPView"); // Reutilizamos la misma vista
         }
     }
 
@@ -294,7 +266,7 @@ public class CheckCSPController implements Initializable {
                 try {
                     if (selected instanceof Entity) {
                         Entity entity = (Entity) selected;
-                        success = ConnectionDAO.deleteEntity(String.valueOf(Integer.parseInt(entity.getNif().replaceAll("[^0-9]", ""))));
+                        success = ConnectionDAO.deleteEntity(entity.getNif());
                     } else if (selected instanceof Product) {
                         Product product = (Product) selected;
                         success = ConnectionDAO.deleteProduct(product.getId());
@@ -357,8 +329,30 @@ public class CheckCSPController implements Initializable {
     }
 
     @FXML
-    public void exportData() {
-        showAlert("Exportar", "Funcionalidad de exportación no implementada aún.");
+    public void goToBills(ActionEvent actionEvent) throws IOException {
+        System.out.println("--- 1. BOTÓN PULSADO ---"); // ¿Sale esto en consola?
+
+        Object selected = tableView.getSelectionModel().getSelectedItem();
+
+        if (selected == null) {
+            System.out.println("--- ERROR: Nada seleccionado ---");
+            showAlert("Selección requerida", "Selecciona un cliente.");
+            return;
+        }
+
+        System.out.println("--- 2. SELECCIONADO: " + selected.getClass().getSimpleName() + " ---");
+
+        if (selected instanceof Entity) {
+            DataStore.selectedEntity = (Entity) selected;
+
+            // VERIFICACIÓN CLAVE
+            System.out.println("--- 3. GUARDADO EN DATASTORE: " + DataStore.selectedEntity.getName() + " ---");
+
+            App.setRoot("listBillView");
+        } else {
+            System.out.println("--- ERROR: No es una Entidad ---");
+            showAlert("Error", "Selecciona un Cliente/Proveedor.");
+        }
     }
 
     private void updateCounters() {
