@@ -69,4 +69,17 @@ public class Entity {
     public String getEmail(){return email;}
     public void setEmail(String email){this.email=email;}
 
+    @Override public String toString() {
+        return
+                "nif='" + nif + '\'' +
+                ", name='" + name + '\'' +
+                ", type=" + type +
+                ", address='" + address + '\'' +
+                ", city='" + city + '\'' +
+                ", province='" + province + '\'' +
+                ", country='" + country + '\'' +
+                ", email='" + email + '\'' +
+                ", cp=" + cp +
+                ", phone=" + phone;
+    }
 }

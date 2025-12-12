@@ -279,6 +279,10 @@ public class ConnectionDAO  {
         return -1;
     }
 
+    public static ArrayList<Entity> getEntidades() {
+        return executeQueryAndMap("SELECT * FROM Entidad", 'E');
+    }
+
     public static boolean insertEntity(Entity e, String nifEmpresa) {
         // 1. SQL para la tabla padre
         String sqlEntidad = "INSERT INTO Entidad (codigo, nif, nombre, email, telefono, direccion, cp, ciudad, provincia, pais) VALUES (?,?,?,?,?,?,?,?,?,?)";
@@ -608,12 +612,12 @@ public class ConnectionDAO  {
             conn.setAutoCommit(false); // Inicio Transacción
 
             long idFactura = -1;
-            try (PreparedStatement pst = conn.prepareStatement(sqlHead)) {
+            try (PreparedStatement pst = conn.prepareStatement(sqlHead, Statement.RETURN_GENERATED_KEYS)) {
                 pst.setString(1, nifEmpresa);
                 pst.setString(2, String.valueOf(b.getType()));
                 pst.setString(3, String.valueOf(b.getNumber()));
                 pst.setDate(4, Date.valueOf(b.getIssueDate()));
-                if(b.getThirdParty() != null) pst.setString(5, b.getThirdParty().getNif()); else pst.setNull(5, Types.BIGINT);
+                if(b.getThirdParty() != null) pst.setInt(5, b.getThirdParty().getId()); else pst.setNull(5, Types.BIGINT);
                 pst.setString(6, b.getConcept());
                 pst.setDouble(7, b.getBaseImponible());
                 pst.setDouble(8, b.getIva());

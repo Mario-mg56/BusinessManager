@@ -220,9 +220,8 @@ public class CheckCSPController implements Initializable {
         DataStore.selectedEntity = null; // Limpiamos para que sepa que es nuevo
 
         // ACTIVAMOS MODO EDICIÓN (Creación es un tipo de edición)
-        BusinessManager.getInstance().editing = true;
 
-        App.setRoot("inspectCSPView");
+        App.setRoot("addEditProductView");
     }
 
     @FXML

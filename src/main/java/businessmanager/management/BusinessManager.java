@@ -23,5 +23,9 @@ public class BusinessManager {
     }
 
     public Company getCurrentCompany() {return currentCompany;}
+
+
     public void setCurrentCompany(Company currentCompany) {this.currentCompany = currentCompany;}
+
+
 }
