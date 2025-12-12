@@ -9,17 +9,13 @@ public class BusinessManager {
     public boolean editing;
 
     private Company currentCompany;
-    private BusinessManager() {
+    public BusinessManager() {
         editing = false;
     }
 
     public void addCompany(Company company) {ConnectionDAO.insertEmpresa(company);}
     public void updateCompany(Company newCompany) {ConnectionDAO.updateEmpresa(newCompany);}
     public void deleteCompany(String nif){ConnectionDAO.deleteEmpresa(nif);}
-
-    public void addEntity(Entity company) {ConnectionDAO.insertEntity(company);}
-    public void updateEntity(Entity newEntity) {ConnectionDAO.updateEntity(newEntity);}
-    public void deleteEntity(String nif){ConnectionDAO.deleteEntity(nif);}
 
     public static BusinessManager getInstance() {
         if (instance == null) instance = new BusinessManager();
